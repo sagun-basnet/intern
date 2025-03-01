@@ -4,6 +4,7 @@ import authRoute from "./router/authRoute.js";
 import userRoute from "./router/userRoute.js";
 import cors from "cors";
 import reviewRoute from "./router/reviewRoute.js";
+import checkinsRoute from "./router/checkinsRoute.js"
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,7 @@ app.use("/api", userRoute);
 app.use("/api", authRoute);
 app.use("/api", routes);
 app.use("/api",reviewRoute)
+app.use("/api",checkinsRoute)
 
 app.listen(port, (err) => {
   if (err) {
