@@ -2,7 +2,12 @@ import { db } from "../database/db_config.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 export const register = (req, res) => {
-  const { name, email, password, role, phone, address } = req.body;
+  const { name, email, password, role, address, phone } = req.body;
+  if (!name || !email || !password || !role || !address || !phone) {
+    return res
+      .status(400)
+      .json({ message: "Please fill in all required fields!" });
+  }
   const q = "select * from `users` where `email` = ?";
   db.query(q, [email], (err, data) => {
     if (err) return res.status(500).json(err);
@@ -19,11 +24,14 @@ export const register = (req, res) => {
       [name, email, hashedPassword, role, phone, address],
       (err, result) => {
         if (err) return res.status(500).json(err);
+        
         return res
           .status(201)
           .json({ message: "User created successfully.", result });
       }
+      
     );
+    
   });
 };
 

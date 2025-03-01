@@ -3,9 +3,9 @@ import bcrypt from "bcryptjs";
 
 export const users = (req, res) => {
   try {
-    const { name, email, password, type, phone } = req.body;
+    const { name, email, password, type, address, phone } = req.body;
 
-    if (!name || !email || !password || !type || !phone) {
+    if (!name || !email || !password || !type || !address || !phone) {
       return res
         .status(400)
         .json({ message: "Please fill in all required fields!" });
@@ -28,13 +28,12 @@ export const users = (req, res) => {
       }
 
       const saltRounds = 10;
-      const hashedPassword = bcrypt.hashSync(password, saltRounds); 
+      const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
-     
-      const userInsertQuery = `INSERT INTO users (name, email, hashedPassword, role, phone) VALUES (?, ?, ?, ?, ?)`;
+      const userInsertQuery = `INSERT INTO users (name, email, hashedPassword, role, address,phone) VALUES (?, ?, ?,?, ?, ?)`;
       db.query(
         userInsertQuery,
-        [name, email, hashedPassword, type, phone],
+        [name, email, hashedPassword, type, address, phone],
         (err, result) => {
           if (err) {
             console.error("Database Error:", err);
@@ -57,6 +56,25 @@ export const users = (req, res) => {
   }
 };
 
+//Get all users
+export const getAllUsers = (req, res) => {
+  try {
+    const query = "SELECT user_id, name, email, role, address, phone FROM users";
+    db.query(query, (err, rows) => {
+      if (err) {
+        console.error("Database Error:", err);
+        return res
+          .status(500)
+          .json({ message: "Database error", error: err.message });
+      }
+
+      res.status(200).json({message:"users retrieved successfully",users: rows });
+    });
+  } catch (error) {
+    console.error("Unexpected Error:", error);
+    res.status(500).json({ message: "Unexpected error", error: error.message });
+  }
+};
 // Get single user by ID
 export const getUserId = (req, res) => {
   try {
@@ -83,38 +101,19 @@ export const getUserId = (req, res) => {
     res.status(500).json({ message: "Unexpected error", error: error.message });
   }
 };
-//Get all users
-export const getAllUsers = (req, res) => {
-  try {
-    const query = "SELECT user_id, name, email, role, phone FROM users"; 
-    db.query(query, (err, rows) => {
-      if (err) {
-        console.error("Database Error:", err);
-        return res
-          .status(500)
-          .json({ message: "Database error", error: err.message });
-      }
-
-      res.status(200).json({ users: rows });
-    });
-  } catch (error) {
-    console.error("Unexpected Error:", error);
-    res.status(500).json({ message: "Unexpected error", error: error.message });
-  }
-};
 
 // update users
 export const updateUser = (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, type } = req.body;
+    const { name, email, phone, address, type } = req.body;
 
-    if (!name || !email || !phone || !type) {
+    if (!name || !email || !phone || address|| !type) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const query = `UPDATE users SET name = ?, email = ?, phone = ?, role = ? WHERE user_id = ?`;
-    db.query(query, [name, email, phone, type, id], (err, result) => {
+    const query = `UPDATE users SET name = ?, email = ?, phone = ?, address=?, role = ? WHERE user_id = ?`;
+    db.query(query, [name, email, phone, address, type, id], (err, result) => {
       if (err) {
         console.error("Database Error:", err);
         return res
